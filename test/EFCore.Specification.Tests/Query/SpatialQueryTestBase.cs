@@ -23,7 +23,7 @@ namespace Microsoft.EntityFrameworkCore.Query
         protected virtual bool AssertDistances
             => true;
 
-        [ConditionalTheory]
+        [ConditionalTheory(Skip = "TaskList#17")]
         [MemberData(nameof(IsAsyncData))]
         public virtual Task SimpleSelect(bool isAsync)
         {
@@ -41,7 +41,7 @@ namespace Microsoft.EntityFrameworkCore.Query
                 });
         }
 
-        [ConditionalTheory]
+        [ConditionalTheory(Skip = "TaskList#17")]
         [MemberData(nameof(IsAsyncData))]
         public virtual Task WithConversion(bool isAsync)
         {
@@ -1190,7 +1190,7 @@ namespace Microsoft.EntityFrameworkCore.Query
         {
             return AssertQuery<PointEntity>(
                 isAsync,
-                es => es.Select(e => new { e.Id, Binary = e.Point == null ? null : ((Geometry)e.Point).ToBinary() }),
+                es => es.Select(e => new { e.Id, Binary = e.Point == null ? null : ((Point)e.Point).ToBinary() }),
                 elementSorter: e => e.Id,
                 elementAsserter: (e, a) =>
                 {
@@ -1205,7 +1205,7 @@ namespace Microsoft.EntityFrameworkCore.Query
         {
             return AssertQuery<PointEntity>(
                 isAsync,
-                es => es.Select(e => new { e.Id, Text = e.Point == null ? null : ((Geometry)e.Point).ToText() }),
+                es => es.Select(e => new { e.Id, Text = e.Point == null ? null : ((Point)e.Point).ToText() }),
                 elementSorter: e => e.Id,
                 elementAsserter: (e, a) =>
                 {
