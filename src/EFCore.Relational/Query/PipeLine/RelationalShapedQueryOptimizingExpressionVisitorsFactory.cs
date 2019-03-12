@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Query.Pipeline;
 
 namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
 {
-    public class RelationalShapedQueryOptimizingExpressionVisitorsFactory : ShapedQueryOptimizingExpressionVisitorsFactory
+    public class RelationalShapedQueryOptimizerFactory : ShapedQueryOptimizerFactory
     {
-        public override ShapedQueryOptimizingExpressionVisitors Create(QueryCompilationContext2 queryCompilationContext)
+        public override ShapedQueryOptimizer Create(QueryCompilationContext2 queryCompilationContext)
         {
-            return new RelationalShapedQueryOptimizingExpressionVisitors(queryCompilationContext);
+            return new RelationalShapedQueryOptimizer(queryCompilationContext);
         }
     }
 }

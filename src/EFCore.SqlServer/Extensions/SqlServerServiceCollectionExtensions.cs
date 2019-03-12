@@ -97,7 +97,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 // New Query Pipeline
                 .TryAdd<IMethodCallTranslatorProvider, SqlServerMethodCallTranslatorProvider>()
                 .TryAdd<IMemberTranslatorProvider, SqlServerMemberTranslatorProvider>()
-                .TryAdd<IShapedQueryOptimizingExpressionVisitorsFactory, SqlServerShapedQueryOptimizingExpressionVisitorsFactory>()
+                .TryAdd<IShapedQueryOptimizerFactory, SqlServerShapedQueryOptimizerFactory>()
 
                 .TryAddProviderSpecificServices(
                     b => b

@@ -11,7 +11,7 @@ namespace Microsoft.EntityFrameworkCore.Query.Pipeline
         private readonly IQueryOptimizerFactory _queryOptimizerFactory;
         private readonly IEntityQueryableTranslatorFactory _entityQueryableTranslatorFactory;
         private readonly IQueryableMethodTranslatingExpressionVisitorFactory _queryableMethodTranslatingExpressionVisitorFactory;
-        private readonly IShapedQueryOptimizingExpressionVisitorsFactory _shapedQueryOptimizingExpressionVisitorsFactory;
+        private readonly IShapedQueryOptimizerFactory _shapedQueryOptimizerFactory;
         private readonly IShapedQueryCompilingExpressionVisitorFactory _shapedQueryCompilingExpressionVisitorFactory;
 
         public QueryCompilationContextFactory2(
@@ -19,14 +19,14 @@ namespace Microsoft.EntityFrameworkCore.Query.Pipeline
             IQueryOptimizerFactory queryOptimizerFactory,
             IEntityQueryableTranslatorFactory entityQueryableTranslatorFactory,
             IQueryableMethodTranslatingExpressionVisitorFactory queryableMethodTranslatingExpressionVisitorFactory,
-            IShapedQueryOptimizingExpressionVisitorsFactory shapedQueryOptimizingExpressionVisitorsFactory,
+            IShapedQueryOptimizerFactory shapedQueryOptimizerFactory,
             IShapedQueryCompilingExpressionVisitorFactory shapedQueryCompilingExpressionVisitorFactory)
         {
             _model = model;
             _queryOptimizerFactory = queryOptimizerFactory;
             _entityQueryableTranslatorFactory = entityQueryableTranslatorFactory;
             _queryableMethodTranslatingExpressionVisitorFactory = queryableMethodTranslatingExpressionVisitorFactory;
-            _shapedQueryOptimizingExpressionVisitorsFactory = shapedQueryOptimizingExpressionVisitorsFactory;
+            _shapedQueryOptimizerFactory = shapedQueryOptimizerFactory;
             _shapedQueryCompilingExpressionVisitorFactory = shapedQueryCompilingExpressionVisitorFactory;
         }
 
@@ -37,7 +37,7 @@ namespace Microsoft.EntityFrameworkCore.Query.Pipeline
                 _queryOptimizerFactory,
                 _entityQueryableTranslatorFactory,
                 _queryableMethodTranslatingExpressionVisitorFactory,
-                _shapedQueryOptimizingExpressionVisitorsFactory,
+                _shapedQueryOptimizerFactory,
                 _shapedQueryCompilingExpressionVisitorFactory)
             {
                 Async = async

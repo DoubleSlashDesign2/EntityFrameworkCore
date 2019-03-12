@@ -3,11 +3,11 @@
 
 namespace Microsoft.EntityFrameworkCore.Query.Pipeline
 {
-    public class ShapedQueryOptimizingExpressionVisitorsFactory : IShapedQueryOptimizingExpressionVisitorsFactory
+    public class ShapedQueryOptimizerFactory : IShapedQueryOptimizerFactory
     {
-        public virtual ShapedQueryOptimizingExpressionVisitors Create(QueryCompilationContext2 queryCompilationContext)
+        public virtual ShapedQueryOptimizer Create(QueryCompilationContext2 queryCompilationContext)
         {
-            return new ShapedQueryOptimizingExpressionVisitors();
+            return new ShapedQueryOptimizer();
         }
     }
 }

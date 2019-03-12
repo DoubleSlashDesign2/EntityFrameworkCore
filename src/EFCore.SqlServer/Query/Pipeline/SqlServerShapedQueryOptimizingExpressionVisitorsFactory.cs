@@ -7,19 +7,18 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Microsoft.EntityFrameworkCore.SqlServer.Query.Pipeline
 {
-    public class SqlServerShapedQueryOptimizingExpressionVisitorsFactory : RelationalShapedQueryOptimizingExpressionVisitorsFactory
+    public class SqlServerShapedQueryOptimizerFactory : RelationalShapedQueryOptimizerFactory
     {
         private readonly ISqlExpressionFactory _sqlExpressionFactory;
 
-        public SqlServerShapedQueryOptimizingExpressionVisitorsFactory(
-            ISqlExpressionFactory sqlExpressionFactory)
+        public SqlServerShapedQueryOptimizerFactory(ISqlExpressionFactory sqlExpressionFactory)
         {
             _sqlExpressionFactory = sqlExpressionFactory;
         }
 
-        public override ShapedQueryOptimizingExpressionVisitors Create(QueryCompilationContext2 queryCompilationContext)
+        public override ShapedQueryOptimizer Create(QueryCompilationContext2 queryCompilationContext)
         {
-            return new SqlServerShapedQueryOptimizingExpressionVisitors(queryCompilationContext, _sqlExpressionFactory);
+            return new SqlServerShapedQueryOptimizer(queryCompilationContext, _sqlExpressionFactory);
         }
     }
 }

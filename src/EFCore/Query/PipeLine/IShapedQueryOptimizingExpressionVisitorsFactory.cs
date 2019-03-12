@@ -3,8 +3,8 @@
 
 namespace Microsoft.EntityFrameworkCore.Query.Pipeline
 {
-    public interface IShapedQueryOptimizingExpressionVisitorsFactory
+    public interface IShapedQueryOptimizerFactory
     {
-        ShapedQueryOptimizingExpressionVisitors Create(QueryCompilationContext2 queryCompilationContext);
+        ShapedQueryOptimizer Create(QueryCompilationContext2 queryCompilationContext);
     }
 }

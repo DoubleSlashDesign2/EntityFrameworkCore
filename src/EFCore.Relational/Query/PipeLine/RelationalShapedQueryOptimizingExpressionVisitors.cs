@@ -4,37 +4,25 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query.Pipeline;
-using Microsoft.EntityFrameworkCore.Relational.Query.Pipeline.SqlExpressions;
 
 namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
 {
-    public class RelationalShapedQueryOptimizingExpressionVisitors : ShapedQueryOptimizingExpressionVisitors
+    public class RelationalShapedQueryOptimizer : ShapedQueryOptimizer
     {
         private QueryCompilationContext2 _queryCompilationContext;
 
-        public RelationalShapedQueryOptimizingExpressionVisitors(QueryCompilationContext2 queryCompilationContext)
+        public RelationalShapedQueryOptimizer(QueryCompilationContext2 queryCompilationContext)
         {
             _queryCompilationContext = queryCompilationContext;
         }
 
-        public override IEnumerable<ExpressionVisitor> GetVisitors()
+        public override Expression Visit(Expression query)
         {
-            yield return new SelectExpressionProjectionApplyingExpressionVisitor();
-            yield return new NullComparisonTransformingExpressionVisitor();
+            query = base.Visit(query);
+            query = new SelectExpressionProjectionApplyingExpressionVisitor().Visit(query);
+            query = new NullComparisonTransformingExpressionVisitor().Visit(query);
+
+            return query;
         }
-    }
-
-    public class SelectExpressionProjectionApplyingExpressionVisitor : ExpressionVisitor
-    {
-        protected override Expression VisitExtension(Expression node)
-        {
-            if (node is SelectExpression selectExpression)
-            {
-                selectExpression.ApplyProjection();
-            }
-
-            return base.VisitExtension(node);
-        }
-
     }
 }

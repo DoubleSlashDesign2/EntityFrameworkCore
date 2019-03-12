@@ -155,7 +155,7 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
                 { typeof(IQueryOptimizerFactory), new ServiceCharacteristics(ServiceLifetime.Scoped) },
                 { typeof(IEntityQueryableTranslatorFactory), new ServiceCharacteristics(ServiceLifetime.Scoped) },
                 { typeof(IQueryableMethodTranslatingExpressionVisitorFactory), new ServiceCharacteristics(ServiceLifetime.Scoped) },
-                { typeof(IShapedQueryOptimizingExpressionVisitorsFactory), new ServiceCharacteristics(ServiceLifetime.Scoped) },
+                { typeof(IShapedQueryOptimizerFactory), new ServiceCharacteristics(ServiceLifetime.Scoped) },
                 { typeof(IShapedQueryCompilingExpressionVisitorFactory), new ServiceCharacteristics(ServiceLifetime.Scoped) },
 
             };
@@ -303,7 +303,7 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
             TryAdd<IQueryCompilationContextFactory2, QueryCompilationContextFactory2>();
             TryAdd<IQueryOptimizerFactory, QueryOptimizerFactory>();
             TryAdd<IEntityQueryableTranslatorFactory, EntityQueryableTranslatorFactory>();
-            TryAdd<IShapedQueryOptimizingExpressionVisitorsFactory, ShapedQueryOptimizingExpressionVisitorsFactory>();
+            TryAdd<IShapedQueryOptimizerFactory, ShapedQueryOptimizerFactory>();
 
             ServiceCollectionMap
                 .TryAddSingleton<DiagnosticSource>(new DiagnosticListener(DbLoggerCategory.Name));

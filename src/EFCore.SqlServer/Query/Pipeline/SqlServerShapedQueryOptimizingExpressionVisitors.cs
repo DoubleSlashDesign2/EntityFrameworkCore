@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore.Relational.Query.Pipeline;
 
 namespace Microsoft.EntityFrameworkCore.SqlServer.Query.Pipeline
 {
-    public class SqlServerShapedQueryOptimizingExpressionVisitors : RelationalShapedQueryOptimizingExpressionVisitors
+    public class SqlServerShapedQueryOptimizer : RelationalShapedQueryOptimizer
     {
         private readonly ISqlExpressionFactory _sqlExpressionFactory;
 
-        public SqlServerShapedQueryOptimizingExpressionVisitors(
+        public SqlServerShapedQueryOptimizer(
             QueryCompilationContext2 queryCompilationContext,
             ISqlExpressionFactory sqlExpressionFactory)
             : base(queryCompilationContext)
@@ -20,14 +20,12 @@ namespace Microsoft.EntityFrameworkCore.SqlServer.Query.Pipeline
             _sqlExpressionFactory = sqlExpressionFactory;
         }
 
-        public override IEnumerable<ExpressionVisitor> GetVisitors()
+        public override Expression Visit(Expression query)
         {
-            foreach (var visitor in base.GetVisitors())
-            {
-                yield return visitor;
-            }
+            query = base.Visit(query);
+            query = new SearchConditionConvertingExpressionVisitor(_sqlExpressionFactory).Visit(query);
 
-            yield return new SearchConditionConvertingExpressionVisitor(_sqlExpressionFactory);
+            return query;
         }
     }
 }
