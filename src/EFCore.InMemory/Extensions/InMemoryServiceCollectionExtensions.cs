@@ -76,7 +76,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 // New Query pipeline
                 .TryAdd<IShapedQueryCompilingExpressionVisitorFactory, InMemoryShapedQueryCompilingExpressionVisitorFactory>()
                 .TryAdd<IQueryableMethodTranslatingExpressionVisitorFactory, InMemoryQueryableMethodTranslatingExpressionVisitorFactory>()
-                .TryAdd<IEntityQueryableExpressionVisitorsFactory, InMemoryEntityQueryableExpressionVisitorsFactory>()
+                .TryAdd<IEntityQueryableTranslatorFactory, InMemoryEntityQueryableTranslatorFactory>()
 
 
                 .TryAdd<IConventionSetBuilder, InMemoryConventionSetBuilder>()

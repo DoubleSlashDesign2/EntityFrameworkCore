@@ -8,18 +8,18 @@ using Microsoft.EntityFrameworkCore.Query.Pipeline;
 
 namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
 {
-    public class RelationalEntityQueryableExpressionVisitors : EntityQueryableExpressionVisitors
+    public class RelationalEntityQueryableTranslator : EntityQueryableTranslator
     {
         private readonly IModel _model;
 
-        public RelationalEntityQueryableExpressionVisitors(IModel model)
+        public RelationalEntityQueryableTranslator(IModel model)
         {
             _model = model;
         }
 
-        public override IEnumerable<ExpressionVisitor> GetVisitors()
+        public override Expression Visit(Expression query)
         {
-            yield return new RelationalEntityQueryableExpressionVisitor2(_model);
+            return new RelationalEntityQueryableExpressionVisitor2(_model).Visit(query);
         }
     }
 }

@@ -10,12 +10,10 @@ using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Query;
-using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors;
 using Microsoft.EntityFrameworkCore.Query.Sql;
 using Microsoft.EntityFrameworkCore.Relational.Query.Pipeline;
 using Microsoft.EntityFrameworkCore.Sqlite.Infrastructure.Internal;
 using Microsoft.EntityFrameworkCore.Sqlite.Migrations.Internal;
-using Microsoft.EntityFrameworkCore.Sqlite.Query.ExpressionVisitors.Internal;
 using Microsoft.EntityFrameworkCore.Sqlite.Query.Internal;
 using Microsoft.EntityFrameworkCore.Sqlite.Query.Pipeline;
 using Microsoft.EntityFrameworkCore.Sqlite.Query.Sql.Internal;
@@ -83,13 +81,13 @@ namespace Microsoft.Extensions.DependencyInjection
                 .TryAdd<IRelationalDatabaseCreator, SqliteDatabaseCreator>()
                 .TryAdd<IHistoryRepository, SqliteHistoryRepository>()
                 .TryAdd<IQuerySqlGeneratorFactory, SqliteQuerySqlGeneratorFactory>()
-                .TryAdd<ISqlTranslatingExpressionVisitorFactory, SqliteSqlTranslatingExpressionVisitorFactory>()
                 .TryAdd<IRelationalResultOperatorHandler, SqliteResultOperatorHandler>()
 
                 // New Query Pipeline
                 .TryAdd<IMethodCallTranslatorProvider, SqliteMethodCallTranslatorProvider>()
                 .TryAdd<IMemberTranslatorProvider, SqliteMemberTranslatorProvider>()
                 .TryAdd<IQuerySqlGeneratorFactory2, SqliteQuerySqlGeneratorFactory2>()
+                .TryAdd<IRelationalSqlTranslatingExpressionVisitorFactory, SqliteSqlTranslatingExpressionVisitorFactory>()
 
                 .TryAddProviderSpecificServices(
                     b => b.TryAddScoped<ISqliteRelationalConnection, SqliteRelationalConnection>());

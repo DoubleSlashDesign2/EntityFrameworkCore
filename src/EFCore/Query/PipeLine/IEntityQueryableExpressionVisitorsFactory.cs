@@ -3,8 +3,8 @@
 
 namespace Microsoft.EntityFrameworkCore.Query.Pipeline
 {
-    public interface IEntityQueryableExpressionVisitorsFactory
+    public interface IEntityQueryableTranslatorFactory
     {
-        EntityQueryableExpressionVisitors Create(QueryCompilationContext2 queryCompilationContext);
+        EntityQueryableTranslator Create(QueryCompilationContext2 queryCompilationContext);
     }
 }

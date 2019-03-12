@@ -8,30 +8,23 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
 {
     public class RelationalQueryableMethodTranslatingExpressionVisitorFactory : IQueryableMethodTranslatingExpressionVisitorFactory
     {
-        private readonly IModel _model;
         private readonly ISqlExpressionFactory _sqlExpressionFactory;
-        private readonly IMemberTranslatorProvider _memberTranslatorProvider;
-        private readonly IMethodCallTranslatorProvider _methodCallTranslatorProvider;
+        private readonly IRelationalSqlTranslatingExpressionVisitorFactory _relationalSqlTranslatingExpressionVisitorFactory;
 
         public RelationalQueryableMethodTranslatingExpressionVisitorFactory(
-            IModel model,
-            ISqlExpressionFactory sqlExpressionFactory,
-            IMemberTranslatorProvider memberTranslatorProvider,
-            IMethodCallTranslatorProvider methodCallTranslatorProvider)
+            IRelationalSqlTranslatingExpressionVisitorFactory relationalSqlTranslatingExpressionVisitorFactory,
+            ISqlExpressionFactory sqlExpressionFactory)
         {
-            _model = model;
             _sqlExpressionFactory = sqlExpressionFactory;
-            _memberTranslatorProvider = memberTranslatorProvider;
-            _methodCallTranslatorProvider = methodCallTranslatorProvider;
+            _relationalSqlTranslatingExpressionVisitorFactory = relationalSqlTranslatingExpressionVisitorFactory;
         }
 
         public QueryableMethodTranslatingExpressionVisitor Create(QueryCompilationContext2 queryCompilationContext)
         {
             return new RelationalQueryableMethodTranslatingExpressionVisitor(
-                _model,
-                _sqlExpressionFactory,
-                _memberTranslatorProvider,
-                _methodCallTranslatorProvider);
+                queryCompilationContext.Model,
+                _relationalSqlTranslatingExpressionVisitorFactory,
+                _sqlExpressionFactory);
         }
     }
 }

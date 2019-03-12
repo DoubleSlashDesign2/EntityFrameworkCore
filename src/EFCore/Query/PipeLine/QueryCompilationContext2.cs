@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Microsoft.EntityFrameworkCore.Query.Pipeline
 {
@@ -10,40 +11,37 @@ namespace Microsoft.EntityFrameworkCore.Query.Pipeline
     {
         public static readonly ParameterExpression QueryContextParameter = Expression.Parameter(typeof(QueryContext), "queryContext");
 
-        private readonly IQueryOptimizingExpressionVisitorsFactory _queryOptimizingExpressionVisitorsFactory;
-        private readonly IEntityQueryableExpressionVisitorsFactory _entityQueryableExpressionVisitorsFactory;
+        private readonly IQueryOptimizerFactory _queryOptimizerFactory;
+        private readonly IEntityQueryableTranslatorFactory _entityQueryableTranslatorFactory;
         private readonly IQueryableMethodTranslatingExpressionVisitorFactory _queryableMethodTranslatingExpressionVisitorFactory;
         private readonly IShapedQueryOptimizingExpressionVisitorsFactory _shapedQueryOptimizingExpressionVisitorsFactory;
         private readonly IShapedQueryCompilingExpressionVisitorFactory _shapedQueryCompilingExpressionVisitorFactory;
 
         public QueryCompilationContext2(
-            IQueryOptimizingExpressionVisitorsFactory queryOptimizingExpressionVisitorsFactory,
-            IEntityQueryableExpressionVisitorsFactory entityQueryableExpressionVisitorsFactory,
+            IModel model,
+            IQueryOptimizerFactory queryOptimizerFactory,
+            IEntityQueryableTranslatorFactory entityQuerableTranslatorFactory,
             IQueryableMethodTranslatingExpressionVisitorFactory queryableMethodTranslatingExpressionVisitorFactory,
             IShapedQueryOptimizingExpressionVisitorsFactory shapedQueryOptimizingExpressionVisitorsFactory,
             IShapedQueryCompilingExpressionVisitorFactory shapedQueryCompilingExpressionVisitorFactory)
         {
-            _queryOptimizingExpressionVisitorsFactory = queryOptimizingExpressionVisitorsFactory;
-            _entityQueryableExpressionVisitorsFactory = entityQueryableExpressionVisitorsFactory;
+            Model = model;
+            _queryOptimizerFactory = queryOptimizerFactory;
+            _entityQueryableTranslatorFactory = entityQuerableTranslatorFactory;
             _queryableMethodTranslatingExpressionVisitorFactory = queryableMethodTranslatingExpressionVisitorFactory;
             _shapedQueryOptimizingExpressionVisitorsFactory = shapedQueryOptimizingExpressionVisitorsFactory;
             _shapedQueryCompilingExpressionVisitorFactory = shapedQueryCompilingExpressionVisitorFactory;
         }
 
         public bool Async { get; internal set; }
+        public IModel Model { get; }
 
         public virtual Func<QueryContext, TResult> CreateQueryExecutor<TResult>(Expression query)
         {
-            foreach (var visitor in _queryOptimizingExpressionVisitorsFactory.Create(this).GetVisitors())
-            {
-                query = visitor.Visit(query);
-            }
+            query = _queryOptimizerFactory.Create(this).Visit(query);
 
             // Convert EntityQueryable to ShapedQueryExpression
-            foreach (var visitor in _entityQueryableExpressionVisitorsFactory.Create(this).GetVisitors())
-            {
-                query = visitor.Visit(query);
-            }
+            query = _entityQueryableTranslatorFactory.Create(this).Visit(query);
 
             query = _queryableMethodTranslatingExpressionVisitorFactory.Create(this).Visit(query);
 

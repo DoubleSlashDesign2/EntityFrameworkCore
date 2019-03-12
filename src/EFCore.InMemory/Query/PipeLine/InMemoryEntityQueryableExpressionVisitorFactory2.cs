@@ -6,18 +6,18 @@ using Microsoft.EntityFrameworkCore.Query.Pipeline;
 
 namespace Microsoft.EntityFrameworkCore.InMemory.Query.Pipeline
 {
-    public class InMemoryEntityQueryableExpressionVisitorsFactory : EntityQueryableExpressionVisitorsFactory
+    public class InMemoryEntityQueryableTranslatorFactory : EntityQueryableTranslatorFactory
     {
         private readonly IModel _model;
 
-        public InMemoryEntityQueryableExpressionVisitorsFactory(IModel model)
+        public InMemoryEntityQueryableTranslatorFactory(IModel model)
         {
             _model = model;
         }
 
-        public override EntityQueryableExpressionVisitors Create(QueryCompilationContext2 queryCompilationContext)
+        public override EntityQueryableTranslator Create(QueryCompilationContext2 queryCompilationContext)
         {
-            return new InMemoryEntityQueryableExpressionVisitors(_model);
+            return new InMemoryEntityQueryableTranslator(_model);
         }
     }
 }

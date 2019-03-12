@@ -94,6 +94,7 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
 
                 // New Query Pipeline
                 { typeof(IQuerySqlGeneratorFactory2), new ServiceCharacteristics(ServiceLifetime.Singleton) },
+                { typeof(IRelationalSqlTranslatingExpressionVisitorFactory), new ServiceCharacteristics(ServiceLifetime.Singleton) },
                 { typeof(IMethodCallTranslatorProvider), new ServiceCharacteristics(ServiceLifetime.Singleton) },
                 { typeof(IMemberTranslatorProvider), new ServiceCharacteristics(ServiceLifetime.Singleton) },
                 { typeof(ISqlExpressionFactory), new ServiceCharacteristics(ServiceLifetime.Singleton) },
@@ -181,8 +182,9 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
             TryAdd<IQueryableMethodTranslatingExpressionVisitorFactory, RelationalQueryableMethodTranslatingExpressionVisitorFactory>();
             TryAdd<IMethodCallTranslatorProvider, RelationalMethodCallTranslatorProvider>();
             TryAdd<IMemberTranslatorProvider, RelationalMemberTranslatorProvider>();
-            TryAdd<IEntityQueryableExpressionVisitorsFactory, RelationalEntityQueryableExpressionVisitorsFactory>();
+            TryAdd<IEntityQueryableTranslatorFactory, RelationalEntityQueryableTranslatorFactory>();
             TryAdd<IShapedQueryOptimizingExpressionVisitorsFactory, RelationalShapedQueryOptimizingExpressionVisitorsFactory>();
+            TryAdd<IRelationalSqlTranslatingExpressionVisitorFactory, RelationalSqlTranslatingExpressionVisitorFactory>();
             TryAdd<ISqlExpressionFactory, SqlExpressionFactory>();
 
             ServiceCollectionMap.GetInfrastructure()

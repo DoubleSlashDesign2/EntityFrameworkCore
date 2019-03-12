@@ -152,8 +152,8 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
 
                 // New Query related services
                 { typeof(IQueryCompilationContextFactory2), new ServiceCharacteristics(ServiceLifetime.Scoped) },
-                { typeof(IQueryOptimizingExpressionVisitorsFactory), new ServiceCharacteristics(ServiceLifetime.Scoped) },
-                { typeof(IEntityQueryableExpressionVisitorsFactory), new ServiceCharacteristics(ServiceLifetime.Scoped) },
+                { typeof(IQueryOptimizerFactory), new ServiceCharacteristics(ServiceLifetime.Scoped) },
+                { typeof(IEntityQueryableTranslatorFactory), new ServiceCharacteristics(ServiceLifetime.Scoped) },
                 { typeof(IQueryableMethodTranslatingExpressionVisitorFactory), new ServiceCharacteristics(ServiceLifetime.Scoped) },
                 { typeof(IShapedQueryOptimizingExpressionVisitorsFactory), new ServiceCharacteristics(ServiceLifetime.Scoped) },
                 { typeof(IShapedQueryCompilingExpressionVisitorFactory), new ServiceCharacteristics(ServiceLifetime.Scoped) },
@@ -254,7 +254,7 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
             TryAdd<IQueryCompiler, QueryCompiler>();
             TryAdd<IQueryModelGenerator, QueryModelGenerator>();
             TryAdd<IQueryAnnotationExtractor, QueryAnnotationExtractor>();
-            TryAdd<IQueryOptimizer, QueryOptimizer>();
+            TryAdd<IQueryOptimizer, Query.Internal.QueryOptimizer>();
             TryAdd<IEntityTrackingInfoFactory, EntityTrackingInfoFactory>();
             TryAdd<ITaskBlockingExpressionVisitor, TaskBlockingExpressionVisitor>();
             TryAdd<IEntityResultFindingExpressionVisitorFactory, EntityResultFindingExpressionVisitorFactory>();
@@ -301,8 +301,8 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
 
             // New QueryPipeline
             TryAdd<IQueryCompilationContextFactory2, QueryCompilationContextFactory2>();
-            TryAdd<IQueryOptimizingExpressionVisitorsFactory, QueryOptimizingExpressionVisitorsFactory>();
-            TryAdd<IEntityQueryableExpressionVisitorsFactory, EntityQueryableExpressionVisitorsFactory>();
+            TryAdd<IQueryOptimizerFactory, QueryOptimizerFactory>();
+            TryAdd<IEntityQueryableTranslatorFactory, EntityQueryableTranslatorFactory>();
             TryAdd<IShapedQueryOptimizingExpressionVisitorsFactory, ShapedQueryOptimizingExpressionVisitorsFactory>();
 
             ServiceCollectionMap

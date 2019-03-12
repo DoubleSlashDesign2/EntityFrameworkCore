@@ -7,11 +7,11 @@ using System.Linq.Expressions;
 
 namespace Microsoft.EntityFrameworkCore.Query.Pipeline
 {
-    public class QueryOptimizingExpressionVisitors
+    public class QueryOptimizer
     {
-        public IEnumerable<ExpressionVisitor> GetVisitors()
+        public Expression Visit(Expression query)
         {
-            return Array.Empty<ExpressionVisitor>();
+            return query;
         }
     }
 }

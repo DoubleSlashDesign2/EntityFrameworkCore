@@ -717,22 +717,22 @@ namespace Microsoft.EntityFrameworkCore.Query
                 predicate: o => o.CustomerID != "ALFKI");
         }
 
-        //[ConditionalTheory]
-        //[MemberData(nameof(IsAsyncData))]
-        //public virtual Task OrderBy_client_Take(bool isAsync)
-        //{
-        //    return AssertQuery<Employee>(
-        //        isAsync,
-        //        es => es.OrderBy(o => ClientEvalSelectorStateless()).Take(10), entryCount: 9);
-        //}
+        [ConditionalTheory]
+        [MemberData(nameof(IsAsyncData))]
+        public virtual Task OrderBy_client_Take(bool isAsync)
+        {
+            return AssertQuery<Employee>(
+                isAsync,
+                es => es.OrderBy(o => ClientEvalSelectorStateless()).Take(10), entryCount: 9);
+        }
 
-        //public static bool ClientEvalPredicateStateless() => true;
+        public static bool ClientEvalPredicateStateless() => true;
 
-        //protected static bool ClientEvalPredicate(Order order) => order.OrderID > 10000;
+        protected static bool ClientEvalPredicate(Order order) => order.OrderID > 10000;
 
-        //private static int ClientEvalSelectorStateless() => 42;
+        private static int ClientEvalSelectorStateless() => 42;
 
-        //protected internal uint ClientEvalSelector(Order order) => order.EmployeeID % 10 ?? 0;
+        protected internal uint ClientEvalSelector(Order order) => order.EmployeeID % 10 ?? 0;
 
         [ConditionalTheory]
         [MemberData(nameof(IsAsyncData))]

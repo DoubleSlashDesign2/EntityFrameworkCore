@@ -20,15 +20,10 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
 
         public RelationalQueryableMethodTranslatingExpressionVisitor(
             IModel model,
-            ISqlExpressionFactory sqlExpressionFactory,
-            IMemberTranslatorProvider memberTranslatorProvider,
-            IMethodCallTranslatorProvider methodCallTranslatorProvider)
+            IRelationalSqlTranslatingExpressionVisitorFactory relationalSqlTranslatingExpressionVisitorFactory,
+            ISqlExpressionFactory sqlExpressionFactory)
         {
-            _sqlTranslator = new RelationalSqlTranslatingExpressionVisitor(
-                model,
-                sqlExpressionFactory,
-                memberTranslatorProvider,
-                methodCallTranslatorProvider);
+            _sqlTranslator = relationalSqlTranslatingExpressionVisitorFactory.Create(model);
 
             _projectionBindingExpressionVisitor = new RelationalProjectionBindingExpressionVisitor(_sqlTranslator);
             _sqlExpressionFactory = sqlExpressionFactory;

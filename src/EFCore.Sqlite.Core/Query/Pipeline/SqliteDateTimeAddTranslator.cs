@@ -42,7 +42,7 @@ namespace Microsoft.EntityFrameworkCore.Sqlite.Query.Pipeline
                     _sqlExpressionFactory.Convert(
                         _sqlExpressionFactory.Divide(
                             arguments[0],
-                            _sqlExpressionFactory.Constant(1000)),
+                            _sqlExpressionFactory.Constant(1000.0)),
                         typeof(string)),
                     _sqlExpressionFactory.Constant(" seconds"));
             }
