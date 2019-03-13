@@ -23,10 +23,12 @@ namespace Microsoft.EntityFrameworkCore.Query.Pipeline
                 .Single(mi => mi.GetParameters().Length == 1);
 
         private readonly IEntityMaterializerSource _entityMaterializerSource;
+        private readonly bool _trackQueryResults;
 
-        public ShapedQueryCompilingExpressionVisitor(IEntityMaterializerSource entityMaterializerSource)
+        public ShapedQueryCompilingExpressionVisitor(IEntityMaterializerSource entityMaterializerSource, bool trackQueryResults)
         {
             _entityMaterializerSource = entityMaterializerSource;
+            _trackQueryResults = trackQueryResults;
         }
 
         protected override Expression VisitExtension(Expression extensionExpression)
@@ -62,7 +64,7 @@ namespace Microsoft.EntityFrameworkCore.Query.Pipeline
         protected virtual LambdaExpression InjectEntityMaterializer(
             LambdaExpression lambdaExpression)
         {
-            var visitor = new EntityMaterializerInjectingExpressionVisitor(_entityMaterializerSource);
+            var visitor = new EntityMaterializerInjectingExpressionVisitor(_entityMaterializerSource, _trackQueryResults);
 
             var modifiedBody = visitor.Visit(lambdaExpression.Body);
 
@@ -86,6 +88,7 @@ namespace Microsoft.EntityFrameworkCore.Query.Pipeline
             private static readonly MethodInfo _startTrackingMethodInfo
                 = typeof(QueryContext).GetMethod(nameof(QueryContext.StartTracking), new[] { typeof(IEntityType), typeof(object) });
             private readonly IEntityMaterializerSource _entityMaterializerSource;
+            private readonly bool _trackQueryResults;
 
             public List<ParameterExpression> Variables { get; } = new List<ParameterExpression>();
 
@@ -93,10 +96,10 @@ namespace Microsoft.EntityFrameworkCore.Query.Pipeline
 
             private int _currentEntityIndex;
 
-
-            public EntityMaterializerInjectingExpressionVisitor(IEntityMaterializerSource entityMaterializerSource)
+            public EntityMaterializerInjectingExpressionVisitor(IEntityMaterializerSource entityMaterializerSource, bool trackQueryResults)
             {
                 _entityMaterializerSource = entityMaterializerSource;
+                _trackQueryResults = trackQueryResults;
             }
 
             protected override Expression VisitExtension(Expression extensionExpression)
@@ -123,12 +126,15 @@ namespace Microsoft.EntityFrameworkCore.Query.Pipeline
 
                     Variables.AddRange(materializationExpression.Variables);
                     Expressions.AddRange(materializationExpression.Expressions.Take(materializationExpression.Expressions.Count - 1));
-                    Expressions.Add(
-                        Expression.Call(
-                            QueryCompilationContext2.QueryContextParameter,
-                            _startTrackingMethodInfo,
-                            Expression.Constant(entityShaperExpression.EntityType),
-                            materializationExpression.Expressions.Last()));
+                    if (_trackQueryResults)
+                    {
+                        Expressions.Add(
+                            Expression.Call(
+                                QueryCompilationContext2.QueryContextParameter,
+                                _startTrackingMethodInfo,
+                                Expression.Constant(entityShaperExpression.EntityType),
+                                materializationExpression.Expressions.Last()));
+                    }
 
                     return materializationExpression.Expressions.Last();
                 }

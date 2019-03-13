@@ -7,7 +7,7 @@ namespace Microsoft.EntityFrameworkCore.Query.Pipeline
     {
         public QueryOptimizer Create(QueryCompilationContext2 queryCompilationContext)
         {
-            return new QueryOptimizer();
+            return new QueryOptimizer(queryCompilationContext);
         }
     }
 }

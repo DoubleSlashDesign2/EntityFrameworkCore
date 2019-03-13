@@ -24,8 +24,9 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
 
         public RelationalShapedQueryCompilingExpressionVisitor(
             IEntityMaterializerSource entityMaterializerSource,
-            IQuerySqlGeneratorFactory2 querySqlGeneratorFactory)
-            : base(entityMaterializerSource)
+            IQuerySqlGeneratorFactory2 querySqlGeneratorFactory,
+            bool trackQueryResults)
+            : base(entityMaterializerSource, trackQueryResults)
         {
             _querySqlGeneratorFactory = querySqlGeneratorFactory;
         }

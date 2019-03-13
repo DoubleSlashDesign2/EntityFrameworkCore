@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Microsoft.EntityFrameworkCore.Query.Pipeline
@@ -23,8 +24,12 @@ namespace Microsoft.EntityFrameworkCore.Query.Pipeline
             IEntityQueryableTranslatorFactory entityQuerableTranslatorFactory,
             IQueryableMethodTranslatingExpressionVisitorFactory queryableMethodTranslatingExpressionVisitorFactory,
             IShapedQueryOptimizerFactory shapedQueryOptimizerFactory,
-            IShapedQueryCompilingExpressionVisitorFactory shapedQueryCompilingExpressionVisitorFactory)
+            IShapedQueryCompilingExpressionVisitorFactory shapedQueryCompilingExpressionVisitorFactory,
+            ICurrentDbContext currentDbContext,
+            bool async)
         {
+            Async = async;
+            TrackQueryResults = currentDbContext.Context.ChangeTracker.QueryTrackingBehavior == QueryTrackingBehavior.TrackAll;
             Model = model;
             _queryOptimizerFactory = queryOptimizerFactory;
             _entityQueryableTranslatorFactory = entityQuerableTranslatorFactory;
@@ -33,8 +38,9 @@ namespace Microsoft.EntityFrameworkCore.Query.Pipeline
             _shapedQueryCompilingExpressionVisitorFactory = shapedQueryCompilingExpressionVisitorFactory;
         }
 
-        public bool Async { get; internal set; }
+        public bool Async { get; }
         public IModel Model { get; }
+        public bool TrackQueryResults { get; internal set; }
 
         public virtual Func<QueryContext, TResult> CreateQueryExecutor<TResult>(Expression query)
         {

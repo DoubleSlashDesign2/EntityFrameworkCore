@@ -17,8 +17,8 @@ namespace Microsoft.EntityFrameworkCore.InMemory.Query.Pipeline
 {
     public class InMemoryShapedQueryCompilingExpressionVisitor : ShapedQueryCompilingExpressionVisitor
     {
-        public InMemoryShapedQueryCompilingExpressionVisitor(IEntityMaterializerSource entityMaterializerSource)
-            : base(entityMaterializerSource)
+        public InMemoryShapedQueryCompilingExpressionVisitor(IEntityMaterializerSource entityMaterializerSource, bool trackQueryResults)
+            : base(entityMaterializerSource, trackQueryResults)
         {
         }
 
