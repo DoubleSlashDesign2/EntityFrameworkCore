@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore.Extensions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Query.Expressions.Internal;
 using Microsoft.EntityFrameworkCore.Query.Pipeline;
 using Microsoft.EntityFrameworkCore.Relational.Query.Pipeline.SqlExpressions;
 
@@ -151,6 +152,11 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
             {
                 return ((SelectExpression)projectionBindingExpression.QueryExpression)
                     .GetProjectionExpression(projectionBindingExpression.ProjectionMember);
+            }
+
+            if (extensionExpression is NullConditionalExpression nullConditionalExpression)
+            {
+                return Visit(nullConditionalExpression.AccessOperation);
             }
 
             return base.VisitExtension(extensionExpression);

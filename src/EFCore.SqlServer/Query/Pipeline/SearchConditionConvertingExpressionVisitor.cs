@@ -36,10 +36,9 @@ namespace Microsoft.EntityFrameworkCore.SqlServer.Query.Pipeline
                 {
                     new CaseWhenClause(
                         sqlExpression,
-                        _sqlExpressionFactory.ApplyDefaultTypeMapping(
-                            _sqlExpressionFactory.Convert(_sqlExpressionFactory.Constant(true), typeof(bool))))
+                        _sqlExpressionFactory.ApplyDefaultTypeMapping(_sqlExpressionFactory.Constant(true)))
                 },
-                _sqlExpressionFactory.Convert(_sqlExpressionFactory.Constant(false), typeof(bool)));
+                _sqlExpressionFactory.Constant(false));
             }
             else
             {

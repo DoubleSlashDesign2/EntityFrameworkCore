@@ -96,9 +96,23 @@ namespace Microsoft.EntityFrameworkCore.Storage
 
         public Func<QueryContext, TResult> CompileQuery2<TResult>([NotNull] Expression query)
         {
-            return Dependencies.QueryCompilationContextFactory2
-                .Create(async: false)
-                .CreateQueryExecutor<TResult>(query);
+            try
+            {
+                return Dependencies.QueryCompilationContextFactory2
+                    .Create(async: false)
+                    .CreateQueryExecutor<TResult>(query);
+            }
+            catch (Exception e)
+            {
+                if (e is NotImplementedException)
+                {
+#pragma warning disable CS8603 // Possible null reference return.
+                    return qc => default;
+#pragma warning restore CS8603 // Possible null reference return.
+                }
+
+                throw;
+            }
         }
     }
 }

@@ -11,6 +11,7 @@ namespace Microsoft.EntityFrameworkCore.Query.Pipeline
     {
         public Expression Visit(Expression query)
         {
+            query = new NullCheckRemovingExpressionVisitor().Visit(query);
             return query;
         }
     }
