@@ -31,11 +31,17 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
 
         protected override ShapedQueryExpression TranslateAll(ShapedQueryExpression source, LambdaExpression predicate)
         {
+            var selectExpression = (SelectExpression)source.QueryExpression;
+            if (selectExpression.Limit != null
+                || selectExpression.Offset != null)
+            {
+                selectExpression.PushdownIntoSubQuery();
+            }
+
             var translation = TranslateLambdaExpression(source, predicate);
 
             if (translation != null)
             {
-                var selectExpression = (SelectExpression)source.QueryExpression;
                 selectExpression.ApplyPredicate(_sqlExpressionFactory.Not(translation));
                 selectExpression.ApplyProjection(new Dictionary<ProjectionMember, Expression>());
                 if (selectExpression.Limit == null
@@ -103,13 +109,19 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
 
         protected override ShapedQueryExpression TranslateAverage(ShapedQueryExpression source, LambdaExpression selector, Type resultType)
         {
+            var selectExpression = (SelectExpression)source.QueryExpression;
+            if (selectExpression.Limit != null
+                || selectExpression.Offset != null)
+            {
+                selectExpression.PushdownIntoSubQuery();
+            }
+
             if (selector != null)
             {
                 source = TranslateSelect(source, selector);
             }
 
-            var projection = (SqlExpression)((SelectExpression)source.QueryExpression)
-                .GetProjectionExpression(new ProjectionMember());
+            var projection = (SqlExpression)selectExpression.GetProjectionExpression(new ProjectionMember());
 
             var inputType = projection.Type.UnwrapNullableType();
             if (inputType == typeof(int)
@@ -272,17 +284,54 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
             return source;
         }
 
-        protected override ShapedQueryExpression TranslateLongCount(ShapedQueryExpression source, LambdaExpression predicate) => throw new NotImplementedException();
+        protected override ShapedQueryExpression TranslateLongCount(ShapedQueryExpression source, LambdaExpression predicate)
+        {
+            var selectExpression = (SelectExpression)source.QueryExpression;
+
+            if (selectExpression.IsDistinct
+                || selectExpression.Limit != null
+                || selectExpression.Offset != null)
+            {
+                selectExpression.PushdownIntoSubQuery();
+            }
+
+            if (predicate != null)
+            {
+                source = TranslateWhere(source, predicate);
+            }
+
+            var translation = _sqlExpressionFactory.ApplyDefaultTypeMapping(
+                _sqlExpressionFactory.Function("COUNT", new[] { _sqlExpressionFactory.Fragment("*") }, typeof(long)));
+            var _projectionMapping = new Dictionary<ProjectionMember, Expression>
+            {
+                { new ProjectionMember(), translation }
+            };
+
+            selectExpression.ClearOrdering();
+            selectExpression.ApplyProjection(_projectionMapping);
+            source.ShaperExpression
+                = Expression.Lambda(
+                    new ProjectionBindingExpression(selectExpression, new ProjectionMember(), typeof(long)),
+                    source.ShaperExpression.Parameters);
+
+            return source;
+        }
 
         protected override ShapedQueryExpression TranslateMax(ShapedQueryExpression source, LambdaExpression selector, Type resultType)
         {
+            var selectExpression = (SelectExpression)source.QueryExpression;
+            if (selectExpression.Limit != null
+                || selectExpression.Offset != null)
+            {
+                selectExpression.PushdownIntoSubQuery();
+            }
+
             if (selector != null)
             {
                 source = TranslateSelect(source, selector);
             }
 
-            var projection = (SqlExpression)((SelectExpression)source.QueryExpression)
-                .GetProjectionExpression(new ProjectionMember());
+            var projection = (SqlExpression)selectExpression.GetProjectionExpression(new ProjectionMember());
 
             projection = _sqlExpressionFactory.Function("MAX", new[] { projection }, resultType, projection.TypeMapping);
 
@@ -291,13 +340,19 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
 
         protected override ShapedQueryExpression TranslateMin(ShapedQueryExpression source, LambdaExpression selector, Type resultType)
         {
+            var selectExpression = (SelectExpression)source.QueryExpression;
+            if (selectExpression.Limit != null
+                || selectExpression.Offset != null)
+            {
+                selectExpression.PushdownIntoSubQuery();
+            }
+
             if (selector != null)
             {
                 source = TranslateSelect(source, selector);
             }
 
-            var projection = (SqlExpression)((SelectExpression)source.QueryExpression)
-                .GetProjectionExpression(new ProjectionMember());
+            var projection = (SqlExpression)selectExpression.GetProjectionExpression(new ProjectionMember());
 
             projection = _sqlExpressionFactory.Function("MIN", new[] { projection }, resultType, projection.TypeMapping);
 
@@ -386,14 +441,20 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
 
         protected override ShapedQueryExpression TranslateSum(ShapedQueryExpression source, LambdaExpression selector, Type resultType)
         {
+            var selectExpression = (SelectExpression)source.QueryExpression;
+            if (selectExpression.Limit != null
+                || selectExpression.Offset != null)
+            {
+                selectExpression.PushdownIntoSubQuery();
+            }
+
             if (selector != null)
             {
                 source = TranslateSelect(source, selector);
             }
 
             var serverOutputType = resultType.UnwrapNullableType();
-            var projection = (SqlExpression)((SelectExpression)source.QueryExpression)
-                .GetProjectionExpression(new ProjectionMember());
+            var projection = (SqlExpression)selectExpression.GetProjectionExpression(new ProjectionMember());
 
             if (serverOutputType == typeof(float))
             {

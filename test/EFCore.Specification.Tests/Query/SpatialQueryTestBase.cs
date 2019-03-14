@@ -23,7 +23,7 @@ namespace Microsoft.EntityFrameworkCore.Query
         protected virtual bool AssertDistances
             => true;
 
-        [ConditionalTheory(Skip = "TaskList#17")]
+        [ConditionalTheory]
         [MemberData(nameof(IsAsyncData))]
         public virtual Task SimpleSelect(bool isAsync)
         {
@@ -41,7 +41,7 @@ namespace Microsoft.EntityFrameworkCore.Query
                 });
         }
 
-        [ConditionalTheory(Skip = "TaskList#17")]
+        [ConditionalTheory]
         [MemberData(nameof(IsAsyncData))]
         public virtual Task WithConversion(bool isAsync)
         {

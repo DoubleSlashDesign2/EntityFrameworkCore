@@ -126,7 +126,7 @@ namespace Microsoft.EntityFrameworkCore.Query.Pipeline
 
                     Variables.AddRange(materializationExpression.Variables);
                     Expressions.AddRange(materializationExpression.Expressions.Take(materializationExpression.Expressions.Count - 1));
-                    if (_trackQueryResults)
+                    if (_trackQueryResults && entityShaperExpression.EntityType.FindPrimaryKey() != null)
                     {
                         Expressions.Add(
                             Expression.Call(

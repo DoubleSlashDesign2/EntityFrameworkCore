@@ -3872,8 +3872,7 @@ namespace Microsoft.EntityFrameworkCore.Query
                 entryCount: 1);
         }
 
-        [ConditionalTheory]
-        [MemberData(nameof(IsAsyncData))]
+        [ConditionalFact]
         public virtual void Select_bitwise_or_with_logical_or()
         {
             using (var context = CreateContext())
@@ -3890,8 +3889,7 @@ namespace Microsoft.EntityFrameworkCore.Query
             }
         }
 
-        [ConditionalTheory]
-        [MemberData(nameof(IsAsyncData))]
+        [ConditionalFact]
         public virtual void Select_bitwise_and_with_logical_and()
         {
             using (var context = CreateContext())

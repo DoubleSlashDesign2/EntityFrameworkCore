@@ -117,10 +117,26 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
 
             if (selectExpression.Orderings.Any())
             {
-                _relationalCommandBuilder.AppendLine()
-                    .Append("ORDER BY ");
+                var orderings = selectExpression.Orderings.ToList();
 
-                GenerateList(selectExpression.Orderings, e => Visit(e));
+                if (selectExpression.Limit == null
+                    && selectExpression.Offset == null)
+                {
+                    orderings.RemoveAll(oe => oe.Expression is SqlConstantExpression || oe.Expression is SqlParameterExpression);
+                }
+
+                if (orderings.Count > 0)
+                {
+                    _relationalCommandBuilder.AppendLine()
+                        .Append("ORDER BY ");
+
+                    GenerateList(orderings, e => Visit(e));
+                }
+            }
+            else if (selectExpression.Offset != null)
+            {
+                _relationalCommandBuilder.AppendLine()
+                    .Append("ORDER BY (SELECT 1)");
             }
 
             GenerateLimitOffset(selectExpression);
@@ -283,7 +299,15 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
 
         protected override Expression VisitOrdering(OrderingExpression orderingExpression)
         {
-            Visit(orderingExpression.Expression);
+            if (orderingExpression.Expression is SqlConstantExpression
+                || orderingExpression.Expression is SqlParameterExpression)
+            {
+                _relationalCommandBuilder.Append("(SELECT 1)");
+            }
+            else
+            {
+                Visit(orderingExpression.Expression);
+            }
 
             if (!orderingExpression.Ascending)
             {
