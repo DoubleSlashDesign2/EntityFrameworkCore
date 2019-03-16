@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Query.Pipeline;
@@ -214,6 +216,7 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
 
             var translation = _sqlExpressionFactory.ApplyDefaultTypeMapping(
                 _sqlExpressionFactory.Function("COUNT", new[] { _sqlExpressionFactory.Fragment("*") }, typeof(int)));
+
             var _projectionMapping = new Dictionary<ProjectionMember, Expression>
             {
                 { new ProjectionMember(), translation }
@@ -261,7 +264,140 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
 
         protected override ShapedQueryExpression TranslateIntersect(ShapedQueryExpression source1, ShapedQueryExpression source2) => throw new NotImplementedException();
 
-        protected override ShapedQueryExpression TranslateJoin(ShapedQueryExpression outer, ShapedQueryExpression inner, LambdaExpression outerKeySelector, LambdaExpression innerKeySelector, LambdaExpression resultSelector) => throw new NotImplementedException();
+        protected override ShapedQueryExpression TranslateJoin(
+            ShapedQueryExpression outer,
+            ShapedQueryExpression inner,
+            LambdaExpression outerKeySelector,
+            LambdaExpression innerKeySelector,
+            LambdaExpression resultSelector)
+        {
+            var joinPredicate = CreateJoinPredicate(outer, outerKeySelector, inner, innerKeySelector);
+            if (joinPredicate != null)
+            {
+                var outerType = resultSelector.Parameters[0].Type;
+                var innerType = resultSelector.Parameters[1].Type;
+                var transparentIdentifierType = typeof(TransparentIdentifier<,>).MakeGenericType(outerType, innerType);
+
+                var outerSelectExpression = (SelectExpression)outer.QueryExpression;
+                var innerSelectExpression = (SelectExpression)inner.QueryExpression;
+                outerSelectExpression.AddInnerJoin(innerSelectExpression, joinPredicate, transparentIdentifierType);
+
+                var shaperExpression = CombineShapers(
+                    outerSelectExpression,
+                    outer.ShaperExpression,
+                    inner.ShaperExpression,
+                    transparentIdentifierType);
+
+                var transparentIdentifierParameter = Expression.Parameter(transparentIdentifierType);
+                var replacements = new Dictionary<Expression, Expression>
+                {
+                    { resultSelector.Parameters[0], AccessOuterTransparentField(transparentIdentifierType, transparentIdentifierParameter) },
+                    { resultSelector.Parameters[1], AccessInnerTransparentField(transparentIdentifierType, transparentIdentifierParameter) },
+                };
+
+                var resultBody = new ReplacingExpressionVisitor(replacements).Visit(resultSelector.Body);
+
+                var newResultSelector = Expression.Lambda(resultBody, transparentIdentifierParameter);
+                outer.ShaperExpression = shaperExpression;
+
+                return TranslateSelect(outer, newResultSelector);
+            }
+
+            throw new NotImplementedException();
+        }
+
+        private LambdaExpression CombineShapers(
+            SelectExpression targetSelectExpression,
+            LambdaExpression outerShaper,
+            LambdaExpression innerShaper,
+            Type transparentIdentifierType)
+        {
+            var outerMemberInfo = transparentIdentifierType.GetTypeInfo().GetDeclaredField("Outer");
+            var innerMemberInfo = transparentIdentifierType.GetTypeInfo().GetDeclaredField("Inner");
+            var outerBody = new MemberAccessShiftingExpressionVisitor(targetSelectExpression, outerMemberInfo).Visit(outerShaper.Body);
+            var innerBody = new MemberAccessShiftingExpressionVisitor(targetSelectExpression, innerMemberInfo).Visit(innerShaper.Body);
+
+            var newBody = Expression.New(
+                transparentIdentifierType.GetTypeInfo().DeclaredConstructors.Single(),
+                new[] { outerBody, innerBody },
+                new[] { outerMemberInfo, innerMemberInfo });
+
+            return Expression.Lambda(newBody, outerShaper.Parameters);
+        }
+
+        private class MemberAccessShiftingExpressionVisitor : ExpressionVisitor
+        {
+            private readonly SelectExpression _targetSelectExpression;
+            private readonly MemberInfo _memberShift;
+
+            public MemberAccessShiftingExpressionVisitor(SelectExpression targetSelectExpression, MemberInfo memberShift)
+            {
+                _targetSelectExpression = targetSelectExpression;
+                _memberShift = memberShift;
+            }
+
+            protected override Expression VisitExtension(Expression node)
+            {
+                if (node is ProjectionBindingExpression projectionBindingExpression)
+                {
+                    return new ProjectionBindingExpression(
+                        _targetSelectExpression,
+                        projectionBindingExpression.ProjectionMember.ShiftMember(_memberShift),
+                        projectionBindingExpression.Type);
+                }
+
+                return base.VisitExtension(node);
+            }
+        }
+
+        private readonly struct TransparentIdentifier<TOuter, TInner>
+        {
+            private TransparentIdentifier(TOuter outer, TInner inner)
+            {
+                Outer = outer;
+                Inner = inner;
+            }
+
+            [UsedImplicitly]
+            public readonly TOuter Outer;
+
+            [UsedImplicitly]
+            public readonly TInner Inner;
+        }
+
+        private static Expression AccessOuterTransparentField(
+            Type transparentIdentifierType,
+            Expression targetExpression)
+        {
+            var fieldInfo = transparentIdentifierType.GetTypeInfo().GetDeclaredField("Outer");
+
+            return Expression.Field(targetExpression, fieldInfo);
+        }
+
+        private static Expression AccessInnerTransparentField(
+            Type transparentIdentifierType,
+            Expression targetExpression)
+        {
+            var fieldInfo = transparentIdentifierType.GetTypeInfo().GetDeclaredField("Inner");
+
+            return Expression.Field(targetExpression, fieldInfo);
+        }
+
+        private SqlBinaryExpression CreateJoinPredicate(ShapedQueryExpression outer,
+            LambdaExpression outerKeySelector,
+            ShapedQueryExpression inner,
+            LambdaExpression innerKeySelector)
+        {
+            var outerKey = TranslateLambdaExpression(outer, outerKeySelector);
+            var innerKey = TranslateLambdaExpression(inner, innerKeySelector);
+
+            if (outerKey != null && innerKey != null)
+            {
+                return _sqlExpressionFactory.Equal(outerKey, innerKey);
+            }
+
+            return null;
+        }
 
         protected override ShapedQueryExpression TranslateLastOrDefault(ShapedQueryExpression source, LambdaExpression predicate, bool returnDefault)
         {

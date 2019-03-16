@@ -15,12 +15,24 @@ namespace Microsoft.EntityFrameworkCore.Query.Pipeline
             ValueBufferExpression = valueBufferExpression;
         }
 
-        public override Type Type => EntityType.ClrType;
-
-        public override ExpressionType NodeType => ExpressionType.Extension;
-
         public IEntityType EntityType { get; }
         public ProjectionBindingExpression ValueBufferExpression { get; }
-    }
 
+        protected override Expression VisitChildren(ExpressionVisitor visitor)
+        {
+            var valueBufferExpression = (ProjectionBindingExpression)visitor.Visit(ValueBufferExpression);
+
+            return Update(valueBufferExpression);
+        }
+
+        public EntityShaperExpression Update(ProjectionBindingExpression valueBufferExpression)
+        {
+            return valueBufferExpression != ValueBufferExpression
+                ? new EntityShaperExpression(EntityType, valueBufferExpression)
+                : this;
+        }
+
+        public override Type Type => EntityType.ClrType;
+        public override ExpressionType NodeType => ExpressionType.Extension;
+    }
 }

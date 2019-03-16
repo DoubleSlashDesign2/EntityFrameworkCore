@@ -4,6 +4,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
+using System;
 
 namespace Microsoft.EntityFrameworkCore.Query.Pipeline
 {
@@ -25,6 +26,14 @@ namespace Microsoft.EntityFrameworkCore.Query.Pipeline
         {
             var existingChain = _memberChain.ToList();
             existingChain.Add(member);
+
+            return new ProjectionMember(existingChain);
+        }
+
+        public ProjectionMember ShiftMember(MemberInfo member)
+        {
+            var existingChain = _memberChain.ToList();
+            existingChain.Insert(0, member);
 
             return new ProjectionMember(existingChain);
         }
@@ -63,5 +72,4 @@ namespace Microsoft.EntityFrameworkCore.Query.Pipeline
             return true;
         }
     }
-
 }

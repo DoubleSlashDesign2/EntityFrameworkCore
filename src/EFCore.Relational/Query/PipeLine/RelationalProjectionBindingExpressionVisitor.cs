@@ -73,12 +73,8 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
                     = _selectExpression.GetProjectionExpression(
                         entityShaperExpression.ValueBufferExpression.ProjectionMember);
 
-                return new EntityShaperExpression(
-                    entityShaperExpression.EntityType,
-                    new ProjectionBindingExpression(
-                        _selectExpression,
-                        _projectionMembers.Peek(),
-                        typeof(ValueBuffer)));
+                return entityShaperExpression.Update(
+                    new ProjectionBindingExpression(_selectExpression, _projectionMembers.Peek(), typeof(ValueBuffer)));
             }
 
             throw new InvalidOperationException();
@@ -94,6 +90,7 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
                 _projectionMembers.Push(projectionMember);
 
                 newArguments[i] = Visit(newExpression.Arguments[i]);
+                _projectionMembers.Pop();
             }
 
             return newExpression.Update(newArguments);
@@ -112,6 +109,7 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
                 _projectionMembers.Push(projectionMember);
 
                 newBindings[i] = memberAssignment.Update(Visit(memberAssignment.Expression));
+                _projectionMembers.Pop();
             }
 
             return memberInitExpression.Update(newExpression, newBindings);

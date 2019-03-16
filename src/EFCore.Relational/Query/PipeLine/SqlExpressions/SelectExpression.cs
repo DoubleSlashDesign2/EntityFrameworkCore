@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Query.Pipeline;
 
@@ -277,6 +278,27 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline.SqlExpressions
             Predicate = null;
             _tables.Clear();
             _tables.Add(subquery);
+        }
+
+        public void AddInnerJoin(SelectExpression innerSelectExpression, SqlExpression joinPredicate, Type transparentIdentifierType)
+        {
+            var joinTable = new InnerJoinExpression(innerSelectExpression.Tables.Single(), joinPredicate);
+            _tables.Add(joinTable);
+
+            var outerMemberInfo = transparentIdentifierType.GetTypeInfo().GetDeclaredField("Outer");
+            var projectionMapping = new Dictionary<ProjectionMember, Expression>();
+            foreach (var projection in _projectionMapping)
+            {
+                projectionMapping[projection.Key.ShiftMember(outerMemberInfo)] = projection.Value;
+            }
+
+            var innerMemberInfo = transparentIdentifierType.GetTypeInfo().GetDeclaredField("Inner");
+            foreach (var projection in innerSelectExpression._projectionMapping)
+            {
+                projectionMapping[projection.Key.ShiftMember(innerMemberInfo)] = projection.Value;
+            }
+
+            _projectionMapping = projectionMapping;
         }
 
         protected override Expression VisitChildren(ExpressionVisitor visitor)

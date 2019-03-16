@@ -106,6 +106,8 @@ namespace Microsoft.EntityFrameworkCore.Query.Pipeline
             {
                 if (extensionExpression is EntityShaperExpression entityShaperExpression)
                 {
+                    // Check for existing entry
+
                     var materializationContext = Expression.Variable(typeof(MaterializationContext), "materializationContext" + _currentEntityIndex);
                     Variables.Add(materializationContext);
                     Expressions.Add(

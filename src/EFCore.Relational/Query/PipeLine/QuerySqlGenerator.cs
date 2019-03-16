@@ -595,7 +595,7 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
             Action<T> generationAction,
             Action<IRelationalCommandBuilder> joinAction = null)
         {
-            joinAction = joinAction ?? (isb => isb.Append(", "));
+            joinAction ??= (isb => isb.Append(", "));
 
             for (var i = 0; i < items.Count; i++)
             {
@@ -606,6 +606,16 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
 
                 generationAction(items[i]);
             }
+        }
+
+        protected override Expression VisitInnerJoin(InnerJoinExpression innerJoinExpression)
+        {
+            _relationalCommandBuilder.Append("INNER JOIN ");
+            Visit(innerJoinExpression.Table);
+            _relationalCommandBuilder.Append(" ON ");
+            Visit(innerJoinExpression.JoinPredicate);
+
+            return innerJoinExpression;
         }
     }
 }

@@ -24,6 +24,9 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
                 case InExpression inExpression:
                     return VisitIn(inExpression);
 
+                case InnerJoinExpression innerJoinExpression:
+                    return VisitInnerJoin(innerJoinExpression);
+
                 case LikeExpression likeExpression:
                     return VisitLike(likeExpression);
 
@@ -63,6 +66,7 @@ namespace Microsoft.EntityFrameworkCore.Relational.Query.Pipeline
 
         protected abstract Expression VisitExists(ExistsExpression existsExpression);
         protected abstract Expression VisitIn(InExpression inExpression);
+        protected abstract Expression VisitInnerJoin(InnerJoinExpression innerJoinExpression);
         protected abstract Expression VisitProjection(ProjectionExpression projectionExpression);
         protected abstract Expression VisitCase(CaseExpression caseExpression);
         protected abstract Expression VisitSqlUnary(SqlUnaryExpression sqlCastExpression);
